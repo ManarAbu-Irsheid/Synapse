@@ -4,6 +4,13 @@ A real-time deep learning system that monitors a driver through a camera and det
 
 > **Status:** 🚧 In progress. The project is currently in the planning phase.
 
+## 👥 Team Members
+
+* **Manar Abu Irsheid** (منار أبو ارشيد)
+* **Sondos Abushunar** (سندس أبو شنار)
+* **Noor Al-Sherman** (نور الشرمان)
+* **Hala Abu Shindi** (هالة أبو شندي)
+
 ## Overview
 
 The system is designed to track three key indicators of fatigue:
