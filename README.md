@@ -7,7 +7,7 @@ A real-time deep learning system that monitors a driver through a camera and det
 ## 👥 Team Members
 
 * **Manar Abu Irsheid** (منار أبو ارشيد)
-* **Sondos Abushunar** (سندس أبو شنار)
+* **Sondos Abu shunar** (سندس أبو شنار)
 * **Noor Al-Sherman** (نور الشرمان)
 * **Hala Abu Shindi** (هالة أبو شندي)
 
