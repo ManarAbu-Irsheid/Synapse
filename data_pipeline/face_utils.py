@@ -80,3 +80,61 @@ def extract_all(frame_bgr):
         "mar": mouth_aspect_ratio(pts),
         "pts": pts,
     }
+
+
+# ================= Video / Real-time mode =================
+def _features(frame_bgr, pts):
+    """نفس مخرجات extract_all لكن من نقاط جاهزة."""
+    return {
+        "left_eye":  crop_roi(frame_bgr, pts, LEFT_EYE,  (64, 64)),
+        "right_eye": crop_roi(frame_bgr, pts, RIGHT_EYE, (64, 64)),
+        "mouth":     crop_roi(frame_bgr, pts, MOUTH,     (96, 96)),
+        "ear": (eye_aspect_ratio(pts, LEFT_EYE) + eye_aspect_ratio(pts, RIGHT_EYE)) / 2,
+        "mar": mouth_aspect_ratio(pts),
+        "pts": pts,
+    }
+
+class FaceTracker:
+    """MediaPipe بوضع VIDEO: لفريمات متتالية (فيديو أو كاميرا)."""
+    def __init__(self, num_faces=1):
+        self.lm = _FaceLandmarker.create_from_options(_Options(
+            base_options=_BaseOptions(model_asset_path=MODEL_PATH),
+            running_mode=_Mode.VIDEO,
+            num_faces=num_faces))
+        self._last_ts = -1
+
+    def process(self, frame_bgr, timestamp_ms):
+        """يرجع نفس dict تبع extract_all، أو None لو ما في وجه."""
+        ts = int(timestamp_ms)
+        if ts <= self._last_ts:          # لازم يزيد دايماً
+            ts = self._last_ts + 1
+        self._last_ts = ts
+        h, w = frame_bgr.shape[:2]
+        rgb = np.ascontiguousarray(cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2RGB))
+        res = self.lm.detect_for_video(
+            mp.Image(image_format=mp.ImageFormat.SRGB, data=rgb), ts)
+        if not res.face_landmarks:
+            return None
+        pts = np.array([(p.x * w, p.y * h) for p in res.face_landmarks[0]])
+        return _features(frame_bgr, pts)
+
+    def close(self):
+        self.lm.close()
+
+def process_video(path, step=1):
+    """يمر على فيديو ويرجع (رقم الفريم، النتيجة). step=5 يعني كل 5 فريمات."""
+    cap = cv2.VideoCapture(path)
+    fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+    tracker = FaceTracker()
+    i = 0
+    try:
+        while True:
+            ok, frame = cap.read()
+            if not ok:
+                break
+            if i % step == 0:
+                yield i, tracker.process(frame, i / fps * 1000)
+            i += 1
+    finally:
+        cap.release()
+        tracker.close()
