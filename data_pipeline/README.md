@@ -29,3 +29,20 @@ Not exactly 70/15/15 because there are only 37 subjects with different image cou
 from dataset import make_dataset
 train_ds = make_dataset("splits/mrl_train.csv", training=True)
 ```
+
+## Mouth / yawning data (NITYMED)
+Dataset: NITYMED (Kaggle, `nikospetrellis/nitymed`, HDTV720), 126 videos available in the Kaggle copy
+(107 Yawning, 19 Microsleep). Licence is CC BY-ND 4.0, so extracted frames, crops, features and split
+CSVs derived from it are **not committed**; regenerate them with the scripts below.
+
+- `extract_frames.py`: per-video CSV of EAR, MAR and head-pose landmark coordinates (every 5th frame, 25 fps -> 5 rows/s).
+- `labeling.py`: yawn = MAR > 0.25 sustained for >= 1.5 s. Negative frames are >= 2 s away from any yawn and MAR below the threshold.
+- Only videos with exactly 3 detected yawn segments were used (87 of 107). The other 20 were excluded and not yet inspected.
+- Result: 3,895 yawn / 3,792 no_yawn mouth crops (96x96 RGB), split by video 60/13/14 (train/val/test).
+- `mouth_dataset.py`: tf.data loader (normalization to [0, 1], augmentation on train only).
+
+### Known limitations
+- Labels are rule-based (MAR threshold), not manually annotated. Visual check was on a small sample only.
+- Negatives we looked at were closed mouths; talking/singing frames were not checked, so the model may confuse an open mouth with a yawn.
+- Split is by video, not by driver (video names have no driver id and the dataset has about 21 drivers), so test accuracy may be optimistic.
+- Microsleep videos were not labeled yet; eye-closure labels for the LSTM are still undecided.
