@@ -46,3 +46,13 @@ CSVs derived from it are **not committed**; regenerate them with the scripts bel
 - Negatives we looked at were closed mouths; talking/singing frames were not checked, so the model may confuse an open mouth with a yawn.
 - Split is by video, not by driver (video names have no driver id and the dataset has about 21 drivers), so test accuracy may be optimistic.
 - Microsleep videos were not labeled yet; eye-closure labels for the LSTM are still undecided.
+
+### Reproduce the mouth dataset
+
+    python data_pipeline/build_mouth_dataset.py --root <.../DSM_Dataset-HDTV720> --out <output dir>
+
+Outputs (kept outside the repo, never committed): features/, mouth/{yawn,no_yawn}/,
+labels/mouth_{train,val,test}.csv, labels/videos_summary.csv. The run is resumable (cache/).
+It assumes 25 fps videos (as in NITYMED). A full run gave 87 of 107 videos used (3 yawn segments each) and
+60/13/14 videos (5,400 / 1,010 / 1,277 crops) for train/val/test, identical to our first notebook run.
+The 20 excluded videos (0, 1, 2 or 4 detected segments) have not been inspected; some may contain real short yawns.

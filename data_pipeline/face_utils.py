@@ -56,7 +56,8 @@ def preprocess_eye(roi_bgr, size=64):
     return g[..., None]            # (64, 64, 1)
 
 def preprocess_mouth(roi_bgr, size=96):
-    return cv2.resize(roi_bgr, (size, size)).astype("float32") / 255.0
+    rgb = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2RGB)   # نفس ترتيب ألوان الـ loader
+    return cv2.resize(rgb, (size, size)).astype("float32") / 255.0
 
 def _d(a, b): return np.linalg.norm(a - b)
 
